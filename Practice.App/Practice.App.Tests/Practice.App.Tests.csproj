@@ -9,9 +9,23 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Include="NSubstitute" Version="4.3.0" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
     <PackageReference Include="coverlet.collector" Version="3.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Practice.App\Practice.App.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Common.Basic">
+      <HintPath>..\..\..\Common.Basic.Tests\Common.Basic.Tests\Common.Basic\bin\Debug\net6.0\Common.Basic.dll</HintPath>
+    </Reference>
+    <Reference Include="Practice.Domain">
+      <HintPath>..\..\..\Practice.Domain.Tests\Practice.Domain\Practice.Domain\bin\Debug\net6.0\Practice.Domain.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
