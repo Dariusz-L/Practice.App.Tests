@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<DefaultItemExcludes>$(DefaultItemExcludes);Practicer.App\**\*.meta</DefaultItemExcludes>
+	<DefaultItemExcludes>$(DefaultItemExcludes);Practicer.App\**\*.asmdef</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Common.Basic">
+      <HintPath>..\..\..\Common.Basic.Tests\Common.Basic.Tests\Common.Basic\bin\Debug\net6.0\Common.Basic.dll</HintPath>
+    </Reference>
+    <Reference Include="Practice.Domain">
+      <HintPath>..\..\..\Practice.Domain.Tests\Practice.Domain\Practice.Domain\bin\Debug\net6.0\Practice.Domain.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
