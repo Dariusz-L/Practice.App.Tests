@@ -4,9 +4,9 @@ namespace Practicer.App.Tests
 {
     internal static class Extensions
     {
-        public static THandler CreateHandler<THandler>(object repository)
+        public static THandler CreateHandler<THandler>(params object[] repositories)
         { 
-            return (THandler) Activator.CreateInstance(typeof(THandler), new object[] { repository });
+            return (THandler) Activator.CreateInstance(typeof(THandler), repositories);
         }
     }
 }
