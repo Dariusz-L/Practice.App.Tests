@@ -1,12 +1,9 @@
 using Common.Basic.Blocks;
-using Common.Basic.CQRS.Command;
 using Common.Basic.CQRS.Query;
 using Common.Basic.Repository;
 using NSubstitute;
 using NUnit.Framework;
-using Practicer.App.Commands;
 using Practicer.App.Queries.Templates.GetTemplateSection;
-using Practicer.Domain.Pages.Content;
 using Practicer.Domain.Templates;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -55,6 +52,29 @@ namespace Practicer.App.Tests
             Assert.AreEqual(vm.Signatures[0].ID, "2");
             Assert.AreEqual(vm.Signatures[1].ID, "3");
             Assert.AreEqual(vm.Signatures[2].ID, "1");
+        }
+
+        [Test]
+        public async Task GivenQueryAndEmptySignatureRepo_WhenHandle_ThenVMCorrect()
+        {
+            // Arrange
+            var signatureRepository = Substitute.For<IRepository<TemplateSignature>>();
+            signatureRepository
+                .GetAll()
+                .Returns(Result.SuccessTask(new List<TemplateSignature>()));
+
+            var signatureListRepository = Substitute.For<IRepository<TemplateSignatureList>>();
+            signatureListRepository
+                .GetBy(AppConfiguration.TemplateSignatureListID)
+                .Returns(Result.SuccessTask());
+
+            // Act
+            var result = await CreateHandler(signatureRepository, signatureListRepository).Handle(Query);
+            var vm = result.Get();
+
+            // Assert
+            Assert.IsTrue(result.IsSuccess);
+            Assert.AreEqual(vm.Signatures.Length, 0);
         }
 
         private IQueryHandler<GetTemplateSectionQuery, GetTemplateSectionQueryVM> CreateHandler(params object[] repositories) =>
