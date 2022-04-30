@@ -23,6 +23,7 @@ namespace Practicer.App.Tests
             // Arrange
             var repository = Substitute.For<IRepository<Page>>();
             repository.GetBy(PageID).Returns(Result.SuccessTask());
+            repository.Save(Arg.Any<Page>()).Returns(Result.SuccessTask(Page));
 
             // Act
             await CreateHandler(repository).Handle(Command);

@@ -5,6 +5,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Practicer.App.Queries.Templates.GetTemplateSection;
 using Practicer.Domain.Templates;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,8 +15,8 @@ namespace Practicer.App.Tests
     {
         private GetTemplateSectionQuery Query = new GetTemplateSectionQuery();
 
-        private static readonly List<TemplateSignature> Signatures = 
-            new List<TemplateSignature>() 
+        private static readonly TemplateSignature[] Signatures = 
+            new TemplateSignature[] 
             {
                 new TemplateSignature("1", "1"),
                 new TemplateSignature("2", "2"),
@@ -61,7 +62,7 @@ namespace Practicer.App.Tests
             var signatureRepository = Substitute.For<IRepository<TemplateSignature>>();
             signatureRepository
                 .GetAll()
-                .Returns(Result.SuccessTask(new List<TemplateSignature>()));
+                .Returns(Result.SuccessTask(Array.Empty<TemplateSignature>()));
 
             var signatureListRepository = Substitute.For<IRepository<TemplateSignatureList>>();
             signatureListRepository
@@ -77,7 +78,7 @@ namespace Practicer.App.Tests
             Assert.AreEqual(vm.Signatures.Length, 0);
         }
 
-        private IQueryHandler<GetTemplateSectionQuery, GetTemplateSectionQueryVM> CreateHandler(params object[] repositories) =>
+        private IQueryHandler<GetTemplateSectionQuery, GetTemplateSectionQueryDTO> CreateHandler(params object[] repositories) =>
             Extensions.CreateHandler<GetTemplateSectionQueryHandler>(repositories);
     }
 }
