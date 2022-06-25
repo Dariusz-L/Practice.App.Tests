@@ -20,7 +20,8 @@ namespace Practicer.App.Tests
             new List<string>() { ChildID },
             new List<SubPage>() { new SubPage(ChildID) },
             new List<Link>() {},
-            new List<SubProperty>() {});
+            new List<SubProperty>() {},
+            null);
 
         private RemovePropertyCommand Command = new RemovePropertyCommand(ParentID, ChildID);
 
