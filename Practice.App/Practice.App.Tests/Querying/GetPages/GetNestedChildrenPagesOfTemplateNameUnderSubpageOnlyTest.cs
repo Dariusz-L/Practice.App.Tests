@@ -1,32 +1,15 @@
-﻿using Common.Basic.Repository;
+﻿using Common.Basic.Blocks;
+using Common.Basic.Repository;
 using NSubstitute;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using TestApp.App;
 using TestApp.Domain;
-using Common.Basic.Blocks;
 
-namespace Practice.App.Tests.Querying
+namespace Practice.App.Tests.Querying.GetPages
 {
-    internal class GetQueryPagesQueryTests
+    internal class GetNestedChildrenPagesOfTemplateNameUnderSubpageOnlyTest
     {
-        private static readonly IPage HashiKanjiCharacter = Substitute.For<IPage>();
-        private static readonly IPage SuHiraganaCharacter = Substitute.For<IPage>();
-        private static readonly IPage RuHiraganaCharacter = Substitute.For<IPage>();
-
-        private static readonly IPage WordFormationPageValue = Substitute.For<IPage>();
-        private static readonly IPage WordFormationPage = Substitute.For<IPage>();
-
-        private static readonly IPage[] Pages = new[]
-        {
-            HashiKanjiCharacter,
-            SuHiraganaCharacter,
-            RuHiraganaCharacter,
-            WordFormationPageValue,
-            WordFormationPage
-        };
-
         private static readonly QueryDTO query = new QueryDTO()
         {
             Name = "Characters",
@@ -124,25 +107,19 @@ namespace Practice.App.Tests.Querying
             }
         };
 
-        [SetUp]
-        public void Setup()
-        {
-            HashiKanjiCharacter.SetPage("HashiKanjiCharacterID", "走", "Kanji Character");
-            RuHiraganaCharacter.SetPage("RuHiraganaCharacterID", "る", "Hiragana Character");
-            SuHiraganaCharacter.SetPage("SuHiraganaCharacterID", "す", "Hiragana Character");
-            WordFormationPageValue.SetPage("WordFormationPageValueID", "走る", "Word Formation Value");
-            WordFormationPage.SetPage("WordFormationPageID", "Affirmative", "Word Formation", WordFormationPageValue);
-        }
+        [OneTimeSetUp]
+        public void Setup() =>
+            Pages.Setup();
 
         [Test]
-        public void Test1()
+        public void GetWordFormationValueCharacters()
         {
             string inputPageID = "inputPageID";
             string queryID = "queryID";
 
             var pageRepository = Substitute.For<IRepositoryNoTask<IPage>>();
-            pageRepository.GetBy(inputPageID).Returns(WordFormationPage.ToResult());
-            pageRepository.GetAll().Returns(Pages.ToResult());
+            pageRepository.GetBy(inputPageID).Returns(Pages.WordFormationPage.ToResult());
+            pageRepository.GetAll().Returns(Pages.Collection.ToResult());
 
             var queryRepository = Substitute.For<IRepositoryNoTask<QueryDTO>>();
             queryRepository.GetBy(queryID).Returns(query.ToResult());
@@ -152,25 +129,8 @@ namespace Practice.App.Tests.Querying
             var pages = handler.Execute(inputPageID, queryID);
 
             Assert.True(pages.Length == 2);
-            Assert.True(pages[0] == HashiKanjiCharacter);
-            Assert.True(pages[1] == RuHiraganaCharacter);
-        }
-    }
-
-    public static class PageExtensions
-    {
-        public static void SetPage(this IPage page, string id, string name, string templateName)
-        {
-            page.ID.Returns(id);
-            page.Name.Returns(name);
-            page.TemplateName.Returns(templateName);
-            page.Items.Returns(Array.Empty<IPage>());
-        }
-
-        public static void SetPage(this IPage page, string id, string name, string templateName, params IPage[] items)
-        {
-            page.SetPage(id, name, templateName);
-            page.Items.Returns(items);
+            Assert.True(pages[0] == Pages.HashiKanjiCharacter);
+            Assert.True(pages[1] == Pages.RuHiraganaCharacter);
         }
     }
 }
