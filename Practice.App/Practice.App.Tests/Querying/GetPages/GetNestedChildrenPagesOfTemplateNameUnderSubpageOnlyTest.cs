@@ -1,9 +1,13 @@
 ﻿using Common.Basic.Blocks;
+using Common.Basic.Files;
+using Common.Basic.Json;
+using Common.Basic.Mapping;
 using Common.Basic.Repository;
 using NSubstitute;
 using NUnit.Framework;
-using System.Collections.Generic;
-using TestApp.App;
+using Practicer.App.Querying;
+using Practicer.Domain.Pages.Content;
+using Practicer.Domain.Templates;
 using TestApp.Domain;
 
 namespace Practice.App.Tests.Querying.GetPages
@@ -12,98 +16,23 @@ namespace Practice.App.Tests.Querying.GetPages
     {
         private static readonly QueryDTO query = new QueryDTO()
         {
-            Name = "Characters",
+            Name = "Words",
             Expressions = new ExpressionDTO[]
             {
                 new ExpressionDTO()
                 {
-                    Type = ExpressionType.FirstIf,
+                    Type = ExpressionType.GetNestedChildrenPagesOfTemplateNameUnderSubpageOnly,
                     Operand = new OperandDTO()
                     {
-                        VariableName = VariableNames.Input,
-                        Type = PropertyType.Items
+                        VariableName = VariableNames.Input
                     },
                     Parameters = new ParametersDTO()
                     {
-                        Type = ParametersType.Predicate,
-                        Predicate = new PredicateDTO()
-                        {
-                            Conditions = new ConditionDTO[]
-                            {
-                                new ConditionDTO()
-                                {
-                                    LeftVariableName = VariableNames.Iterator,
-                                    LeftVariablePropertyType = PropertyType.TemplateName,
-
-                                    Operator = ConditionOperatorType.Equals,
-                                    RightVariableOperand = new ConditionOperand()
-                                    {
-                                        Type = ConditionOperandType.Template,
-                                        TemplateName = "Word Formation Value"
-                                    }
-                                }
-                            },
-
-                        }
+                        Type = ParametersType.String, // Template Signature Name
+                        StringParameter = "Word"
                     },
-                    OutputName = "Word Formation Value"
+                    OutputName = "Words Under Subpage Only"
                 },
-
-                new ExpressionDTO()
-                {
-                    Type = ExpressionType.GetPagesOfTemplateName,
-                    Operand = new OperandDTO()
-                    {
-                        VariableName = VariableNames.Pages,
-                        Type = PropertyType.This
-                    },
-                    Parameters = new ParametersDTO()
-                    {
-                        Type = ParametersType.StringArray,
-                        StringArrayParameter = new List<string>()
-                        {
-                            "Hiragana Character",
-                            "Katakana Character",
-                            "Kanji Character"
-                        }
-                    },
-                    OutputName = "Character Pages"
-                },
-
-                new ExpressionDTO()
-                {
-                    Type = ExpressionType.Where,
-                    Operand = new OperandDTO()
-                    {
-                        VariableName = "Character Pages",
-                        Type = PropertyType.This
-                    },
-                    Parameters = new ParametersDTO()
-                    {
-                        Type = ParametersType.Predicate,
-                        Predicate = new PredicateDTO()
-                        {
-                            Conditions = new ConditionDTO[]
-                            {
-                                new ConditionDTO()
-                                {
-                                    LeftVariableName = VariableNames.Iterator,
-                                    LeftVariablePropertyType = PropertyType.Name,
-
-                                    Operator = ConditionOperatorType.EqualsAny,
-                                    RightVariableOperand = new ConditionOperand()
-                                    {
-                                        Type = ConditionOperandType.Variable,
-                                        VariableName = "Word Formation Value",
-                                        VariablePropertyType = PropertyType.Name,
-                                    }
-                                }
-                            },
-
-                        }
-                    },
-                    OutputName = "Word Formation Value Character Pages"
-                }
             }
         };
 
@@ -112,25 +41,42 @@ namespace Practice.App.Tests.Querying.GetPages
             Pages.Setup();
 
         [Test]
-        public void GetWordFormationValueCharacters()
+        public void Get()
         {
-            string inputPageID = "inputPageID";
-            string queryID = "queryID";
+            const string inputPageID = "6f1c113e-259e-4ffe-82d8-f95321203fe5"; // Misa Ammo
+            const string queryID = "queryID";
 
-            var pageRepository = Substitute.For<IRepositoryNoTask<IPage>>();
-            pageRepository.GetBy(inputPageID).Returns(Pages.WordFormationPage.ToResult());
-            pageRepository.GetAll().Returns(Pages.Collection.ToResult());
+            GetRepositories(
+                out var pageRepository,
+                out var templateSignatureRepository);
 
             var queryRepository = Substitute.For<IRepositoryNoTask<QueryDTO>>();
             queryRepository.GetBy(queryID).Returns(query.ToResult());
 
-            var handler = new GetQueryPagesQueryHandler(pageRepository, queryRepository);
+            var handler = new GetQueryPagesQueryHandler(pageRepository, templateSignatureRepository, queryRepository);
 
             var pages = handler.Execute(inputPageID, queryID);
 
             Assert.True(pages.Length == 2);
             Assert.True(pages[0] == Pages.HashiKanjiCharacter);
             Assert.True(pages[1] == Pages.RuHiraganaCharacter);
+        }
+
+        private static void GetRepositories(
+            out IRepository<Page> pageRepository,
+            out IRepository<TemplateSignature> templateSignatureRepository)
+        {
+            var jsonConverter = new NewtonsoftJsonConverter();
+            var dirOps = new DirectoryOperations();
+            var fileOps = new FileOperations();
+
+            var dataPath = @"C:\Users\dariu\AppData\LocalLow\daretsuki\Practice-Prototype";
+
+            pageRepository = 
+                new LocalStorageRepository<Page>(dataPath + @"\Pages", dirOps, fileOps, jsonConverter);
+
+            templateSignatureRepository = 
+                new LocalStorageRepository<TemplateSignature>(dataPath + @"\TemplateSignatures", dirOps, fileOps, jsonConverter);
         }
     }
 }
